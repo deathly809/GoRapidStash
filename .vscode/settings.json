@@ -3,5 +3,5 @@
 	"go.buildOnSave": true,
     "go.lintOnSave": true,
     "go.vetOnSave": true,
-    "go.formatTool": "goreturns"
+    "go.formatTool": "gofmt"
 }
