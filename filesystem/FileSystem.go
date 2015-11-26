@@ -5,11 +5,25 @@ import (
 	"io"
 )
 
+// FileOffset is the relative offset in the file from
+// a given  position
+type FileOffset int
+
+// Beginning
+// Current
+// End
+const (
+	Beginning FileOffset = iota
+	Current
+	End
+)
+
 // File is an interface to represent basic operations of a file?
 type File interface {
 	Close() error
-	Write(data []byte, pos int) (int, error)
-	Read(pos, len, offset int) ([]byte, error)
+	Write(data []byte) (int, error)
+	Read(data []byte) (int, error)
+	Seek(int,FileOffset)
 	IsNew() bool
 	Name() string
 }

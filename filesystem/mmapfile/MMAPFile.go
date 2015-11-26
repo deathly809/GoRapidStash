@@ -38,6 +38,7 @@ type mmapFileImpl struct {
 	file    *os.File
 	lock    *sync.Mutex
 	name    string
+	pos int
 }
 
 /* Required for interface */
@@ -61,8 +62,8 @@ func (mFile *mmapFileImpl) Close() error {
 	return nil
 }
 
-func (mFile *mmapFileImpl) Write(data []byte, pos int) (int, error) {
-	start := pos + _HeaderSize
+func (mFile *mmapFileImpl) Write(data []byte) (int, error) {
+	start := mFile.pos + _HeaderSize
 	end := start + len(data)
 
 	mFile.lock.Lock()
@@ -76,36 +77,50 @@ func (mFile *mmapFileImpl) Write(data []byte, pos int) (int, error) {
 	}
 
 	length := copy(to, data)
+	mFile.pos = end // we have moved
+	
 	mFile.lock.Unlock()
 	mFile.memmap.Flush()
 
 	return length, nil
 }
 
-func (mFile *mmapFileImpl) Read(pos, length, offset int) ([]byte, error) {
-	start := _HeaderSize + pos + offset
-	end := start + length
+func (mFile *mmapFileImpl) Seek(pos int, from filesystem.FileOffset) {
+	switch from {
+		case filesystem.Beginning:
+			mFile.pos = pos
+		case filesystem.Current:
+			mFile.pos = pos + pos;
+		case filesystem.End:
+			mFile.pos = mFile.mapSize - pos
+	}
+	mFile.pos = math.MaxInt(0,math.MinInt(mFile.pos,mFile.mapSize-1))
+}
 
+func (mFile *mmapFileImpl) Read(data []byte) (int, error) {
+	start := _HeaderSize + mFile.pos
+	end := math.MinInt(mFile.mapSize,start + len(data))
+
+	length := end - start
+	
 	if end > mFile.mapSize {
-		return nil, errors.New("Tried to read beyond end of file")
+		return 0, errors.New("Tried to read beyond end of file")
 	}
 
 	if length > _MaxFileSize {
 		log.Fatal("File too large")
 	}
 
-	result := make([]byte, length)
-	if result == nil {
-		log.Fatal("Could not allocate memory for read")
-	}
-
-	check := copy(result, mFile.memmap[start:])
-
+	check := copy(data, mFile.memmap[start:])
+	
 	if check != length {
 		log.Fatal("Could not read entire length")
 	}
-
-	return result, nil
+	
+	// Moved on
+	mFile.pos = end
+	
+	return length, nil
 }
 
 // IsNew returns true if this file was new when created, otherwise

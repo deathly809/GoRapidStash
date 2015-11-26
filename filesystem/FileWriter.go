@@ -9,7 +9,7 @@ type mmapWriter struct {
 }
 
 func (writer *mmapWriter) Write(data []byte) (written int, err error) {
-	return writer.file.Write(data, 0)
+	return writer.file.Write(data)
 }
 
 
