@@ -3,26 +3,23 @@
 //	create and return a SafeReader?
 //
 
-package filesystem
+package readers
 
-import (
-	"io"
-)
+import "io"
 
-type mmapReader struct {
+type fileReader struct {
 	file File
 }
 
-func (reader *mmapReader) Read(p []byte) (int, error) {
+func (reader *fileReader) Read(p []byte) (int, error) {
 	return reader.file.Read(p)
-	
+
 }
 
-
 // NewSafeReader takes in a File object and returns a reader that
-// allows users to write to the file 
+// allows users to write to the file
 func NewSafeReader(f File) io.Reader {
-	result := new(mmapReader)
+	result := new(fileReader)
 	result.file = f
 	return result
 }

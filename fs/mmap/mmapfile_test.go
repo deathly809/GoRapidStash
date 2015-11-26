@@ -1,4 +1,4 @@
-package mmapfile
+package mmap
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/deathly809/gorapidstash/filesystem"
+	"github.com/deathly809/gorapidstash/fs"
 )
 
 const (
@@ -63,7 +63,7 @@ func TestWrite(t *testing.T) {
 	}
 
 	data := make([]byte, len(testData))
-	file.Seek(0, filesystem.Beginning)
+	file.Seek(0, fs.Beginning)
 	n, err = file.Read(data)
 
 	if n != len(testData) {

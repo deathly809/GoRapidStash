@@ -1,4 +1,4 @@
-package mmapfile
+package mmap
 
 import (
 	"assert"
@@ -11,22 +11,22 @@ import (
 	"sync"
 	"unsafe"
 
-	"github.com/deathly809/gorapidstash/filesystem"
+	"github.com/deathly809/gorapidstash/fs"
 	"github.com/edsrzf/mmap-go"
 )
 
-// MMapFile represents a File which is mapped to some place in memory
-type MMapFile interface {
-	filesystem.File
+// File represents a File which is mapped to some place in memory
+type File interface {
+	fs.File
 	// Bytes returns the underlying memory that the file backs
 	// If you want to use this you will need to lock the file
 	// before
 	Bytes() []byte
-	
+
 	// Lock will lock the file from further reading or writing
 	// through the File Read/Write interface
 	Lock()
-	
+
 	// Unlock will allow the file to be written and read from using
 	// the File Read/Write interface
 	Unlock()
@@ -115,13 +115,13 @@ func (mFile *mmapFileImpl) Unlock() {
 	mFile.lock.Unlock()
 }
 
-func (mFile *mmapFileImpl) Seek(pos int, from filesystem.FileOffset) {
+func (mFile *mmapFileImpl) Seek(pos int, from fs.FileOffset) {
 	switch from {
-	case filesystem.Beginning:
+	case fs.Beginning:
 		mFile.pos = pos
-	case filesystem.Current:
+	case fs.Current:
 		mFile.pos = pos + pos
-	case filesystem.End:
+	case fs.End:
 		mFile.pos = mFile.mapSize - pos
 	}
 	mFile.pos = math.MaxInt(0, math.MinInt(mFile.pos, mFile.mapSize-1))
@@ -246,7 +246,7 @@ func (mFile *mmapFileImpl) align(offset int) int {
 /* Constructors */
 
 // NewFile creates a new memory mapped file
-func NewFile(fName string) (filesystem.File, error) {
+func NewFile(fName string) (fs.File, error) {
 	var err error
 
 	result := new(mmapFileImpl)

@@ -27,7 +27,7 @@
 			"isTestCommand": true,
 			"args" : [
 				"-v",
-				"github.com/deathly809/gorapidstash/filesystem/mmapfile"
+				"github.com/deathly809/gorapidstash/fs/mmap"
 			]
 		},
 		{
