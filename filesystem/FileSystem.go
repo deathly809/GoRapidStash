@@ -1,5 +1,5 @@
 
-package filesystem
+package rapidstash
 
 import (
 	"io"

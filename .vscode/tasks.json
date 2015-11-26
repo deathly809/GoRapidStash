@@ -19,20 +19,20 @@
 			"showOutput": "always",
 			"isBuildCommand": true,
 			"args": [
-				"rapidstash"
+				"github.com/deathly809/GoRapidStash/rapidstash"
 			]
 		},
 		{
 			"taskName": "test",
 			"isTestCommand": true,
 			"args" : [
-				"rapidstash"
+				"github.com/deathly809/GoRapidStash/"
 			]
 		},
 		{
 			"taskName": "clean",
 			"args": [
-				"rapidstash"
+				"github.com/deathly809/GoRapidStash/"
 			]
 		}
 	]

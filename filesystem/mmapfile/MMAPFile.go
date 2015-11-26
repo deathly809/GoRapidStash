@@ -1,4 +1,4 @@
-package filesystem
+package rapidstash
 
 import (
 	"assert"
@@ -11,6 +11,7 @@ import (
 	"os"
 	"sync"
 	"unsafe"
+	"github.com/deathl809/GoRapidStash/filesystem"
 )
 
 var _Sanity = []byte{0x0, 0x0, 0xd, 0x1, 0xe, 0x5, 0x0, 0xf, 0xd, 0x0, 0x0, 0xd, 0xa, 0xd, 0x5}
@@ -196,7 +197,7 @@ func (mFile *mmapFileImpl) align(offset int) int {
 /* Constructors */
 
 // NewFile creates a new memory mapped file
-func NewFile(fName string) (File, error) {
+func NewFile(fName string) (filesystem.File, error) {
 	var err error
 
 	result := new(mmapFileImpl)
