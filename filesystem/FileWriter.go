@@ -1,4 +1,4 @@
-package rapidstash
+package filesystem
 
 import (
 	"io"

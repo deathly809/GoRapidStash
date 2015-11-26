@@ -1,4 +1,4 @@
-package rapidstash
+package mmapfile
 
 import (
 	"assert"
@@ -11,7 +11,7 @@ import (
 	"os"
 	"sync"
 	"unsafe"
-	"github.com/deathl809/GoRapidStash/filesystem"
+	"github.com/deathly809/gorapidstash/filesystem"
 )
 
 var _Sanity = []byte{0x0, 0x0, 0xd, 0x1, 0xe, 0x5, 0x0, 0xf, 0xd, 0x0, 0x0, 0xd, 0xa, 0xd, 0x5}

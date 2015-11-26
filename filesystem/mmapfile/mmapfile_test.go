@@ -1,4 +1,6 @@
-package rapidstash
+
+package mmapfile
+
 
 import (
 	"bytes"
@@ -6,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"github.com/deathly809/GoRapidStash/filesystem"
 )
 
 const (

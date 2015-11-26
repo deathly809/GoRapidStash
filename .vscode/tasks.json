@@ -19,20 +19,21 @@
 			"showOutput": "always",
 			"isBuildCommand": true,
 			"args": [
-				"github.com/deathly809/GoRapidStash/rapidstash"
+				"github.com/deathly809/gorapidstash/rapidstash"
 			]
 		},
 		{
 			"taskName": "test",
 			"isTestCommand": true,
 			"args" : [
-				"github.com/deathly809/GoRapidStash/"
+				"-v",
+				"github.com/deathly809/gorapidstash/filesystem/mmapfile"
 			]
 		},
 		{
 			"taskName": "clean",
 			"args": [
-				"github.com/deathly809/GoRapidStash/"
+				"github.com/deathly809/gorapidstash/"
 			]
 		}
 	]
