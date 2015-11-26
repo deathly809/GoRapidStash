@@ -5,20 +5,38 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"github.com/edsrzf/mmap-go"
 	"jeff/math"
 	"log"
 	"os"
 	"sync"
 	"unsafe"
+
 	"github.com/deathly809/gorapidstash/filesystem"
+	"github.com/edsrzf/mmap-go"
 )
+
+// MMapFile represents a File which is mapped to some place in memory
+type MMapFile interface {
+	filesystem.File
+	// Bytes returns the underlying memory that the file backs
+	// If you want to use this you will need to lock the file
+	// before
+	Bytes() []byte
+	
+	// Lock will lock the file from further reading or writing
+	// through the File Read/Write interface
+	Lock()
+	
+	// Unlock will allow the file to be written and read from using
+	// the File Read/Write interface
+	Unlock()
+}
 
 var _Sanity = []byte{0x0, 0x0, 0xd, 0x1, 0xe, 0x5, 0x0, 0xf, 0xd, 0x0, 0x0, 0xd, 0xa, 0xd, 0x5}
 
 const (
-	_Version      byte = byte(1)
-	_MaxFileSize       = 1000000000
+	_Version     byte = byte(1)
+	_MaxFileSize      = 1000000000
 	_HeaderSize       = int(unsafe.Sizeof(_Version)+unsafe.Sizeof(1)) + 16
 	_InitialSize      = 4096 + _HeaderSize
 )
@@ -38,12 +56,16 @@ type mmapFileImpl struct {
 	file    *os.File
 	lock    *sync.Mutex
 	name    string
-	pos int
+	pos     int
 }
 
 /* Required for interface */
 
-// Close cleans up all resources, flushes, and closes the 
+func (mFile *mmapFileImpl) Bytes() []byte {
+	return mFile.memmap
+}
+
+// Close cleans up all resources, flushes, and closes the
 // memory mapped file
 func (mFile *mmapFileImpl) Close() error {
 	mFile.writeHeader()
@@ -78,31 +100,43 @@ func (mFile *mmapFileImpl) Write(data []byte) (int, error) {
 
 	length := copy(to, data)
 	mFile.pos = end // we have moved
-	
+
 	mFile.lock.Unlock()
 	mFile.memmap.Flush()
 
 	return length, nil
 }
 
+func (mFile *mmapFileImpl) Lock() {
+	mFile.lock.Lock()
+}
+
+func (mFile *mmapFileImpl) Unlock() {
+	mFile.lock.Unlock()
+}
+
 func (mFile *mmapFileImpl) Seek(pos int, from filesystem.FileOffset) {
 	switch from {
-		case filesystem.Beginning:
-			mFile.pos = pos
-		case filesystem.Current:
-			mFile.pos = pos + pos;
-		case filesystem.End:
-			mFile.pos = mFile.mapSize - pos
+	case filesystem.Beginning:
+		mFile.pos = pos
+	case filesystem.Current:
+		mFile.pos = pos + pos
+	case filesystem.End:
+		mFile.pos = mFile.mapSize - pos
 	}
-	mFile.pos = math.MaxInt(0,math.MinInt(mFile.pos,mFile.mapSize-1))
+	mFile.pos = math.MaxInt(0, math.MinInt(mFile.pos, mFile.mapSize-1))
+}
+
+func (mFile *mmapFileImpl) Size() int {
+	return mFile.mapSize
 }
 
 func (mFile *mmapFileImpl) Read(data []byte) (int, error) {
 	start := _HeaderSize + mFile.pos
-	end := math.MinInt(mFile.mapSize,start + len(data))
+	end := math.MinInt(mFile.mapSize, start+len(data))
 
 	length := end - start
-	
+
 	if end > mFile.mapSize {
 		return 0, errors.New("Tried to read beyond end of file")
 	}
@@ -112,14 +146,14 @@ func (mFile *mmapFileImpl) Read(data []byte) (int, error) {
 	}
 
 	check := copy(data, mFile.memmap[start:])
-	
+
 	if check != length {
 		log.Fatal("Could not read entire length")
 	}
-	
+
 	// Moved on
 	mFile.pos = end
-	
+
 	return length, nil
 }
 
@@ -169,7 +203,7 @@ func (mFile *mmapFileImpl) grow(newSize int) {
 func (mFile *mmapFileImpl) writeHeader() {
 
 	var buff bytes.Buffer
-	err := binary.Write(&buff, binary.BigEndian,_Sanity)
+	err := binary.Write(&buff, binary.BigEndian, _Sanity)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

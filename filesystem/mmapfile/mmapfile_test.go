@@ -1,6 +1,4 @@
-
 package mmapfile
-
 
 import (
 	"bytes"
@@ -8,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
 	"github.com/deathly809/gorapidstash/filesystem"
 )
 
@@ -62,15 +61,15 @@ func TestWrite(t *testing.T) {
 	if n != len(testData) {
 		t.Error("Did not write all data")
 	}
-	
-	data := make([]byte,len(testData))
-	file.Seek(0,filesystem.Beginning)
+
+	data := make([]byte, len(testData))
+	file.Seek(0, filesystem.Beginning)
 	n, err = file.Read(data)
 
 	if n != len(testData) {
 		t.Error("Did no read all data from file")
 	}
-	
+
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -92,7 +91,7 @@ func TestRead(t *testing.T) {
 		return
 	}
 
-	data := make([]byte,len(testData))
+	data := make([]byte, len(testData))
 	n, err := file.Read(data)
 
 	if n != len(testData) {
@@ -123,11 +122,11 @@ func TestWrite_LargeFile(t *testing.T) {
 		return
 	}
 
-	n,err := file.Write(data)
+	n, err := file.Write(data)
 	if n != _LargeFile {
 		t.Error("Did not write all data to file")
 	}
-	
+
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -148,7 +147,7 @@ func TestRead_LargeFile(t *testing.T) {
 	}
 	test := make([]byte, _LargeFile)
 	n, err := file.Read(test)
-	
+
 	if n != _LargeFile {
 		t.Error("Did not read all data from file")
 	}

@@ -1,3 +1,9 @@
+//
+//	TODO: Think about this a lot.  Do we want to have the FileSystem
+//	create and return a SafeWriter?
+//
+
+
 package filesystem
 
 import (
@@ -13,8 +19,8 @@ func (writer *mmapWriter) Write(data []byte) (written int, err error) {
 }
 
 
-// NewWriter takes in a File object and returns a writer that
+// NewSafeWriter takes in a File object and returns a writer that
 // allows users to Write to the file 
-func NewWriter(f File) io.Writer {
+func NewSafeWriter(f File) io.Writer {
 	return new(mmapWriter)
 }

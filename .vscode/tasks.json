@@ -19,7 +19,7 @@
 			"showOutput": "always",
 			"isBuildCommand": true,
 			"args": [
-				"github.com/deathly809/gorapidstash/rapidstash"
+				"github.com/deathly809/gorapidstash"
 			]
 		},
 		{
