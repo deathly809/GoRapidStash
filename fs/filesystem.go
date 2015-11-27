@@ -1,8 +1,6 @@
 package fs
 
-import (
-	"io"
-)
+import "io"
 
 // FileSystem is an interface into your brain
 type FileSystem interface {

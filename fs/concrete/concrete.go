@@ -1,4 +1,3 @@
-
 // The concrete package contains concrete implementations
 // of the FileSystem interface.
 
@@ -10,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"time"
+	"errors"
 
 	"github.com/deathly809/gorapidstash/fs/mmapfile"
 )
@@ -69,21 +69,13 @@ type fileSystemImpl struct {
 	mFile     File
 }
 
-func (fSys *fileSystemImpl) readHeader() {
+func (fSys *fileSystemImpl) readHeader() error {
 	header := make([]byte, _HeaderSize)
 
 	fSys.mFile.Seek(0, Beginning)
 	fSys.mFile.Read(header)
 
 	buffer := bytes.NewReader(header)
-
-	/*
-		_SignatureSize  = 8
-		_VersionBytes   = 12
-		_FileCountBytes = 12
-		_SizeBytes      = 12
-		_FirstFreeBytes = 12
-	*/
 
 	signature := make([]byte, _SignatureSize)
 	buffer.Read(signature)
@@ -94,7 +86,8 @@ func (fSys *fileSystemImpl) readHeader() {
 	binary.Read(buffer, binary.BigEndian, &patch)
 
 	if major != Major {
-		log.Print(fmt.Sprintf("Trying to load an incompatible filesystem version: %d.%d.%d", major, minor, patch))
+		msg := fmt.Sprintf("Trying to load an incompatible filesystem version: %d.%d.%d", major, minor, patch)
+		return errors.New(msg)
 	}
 
 	var numFiles, size, firstFree int32
@@ -102,22 +95,27 @@ func (fSys *fileSystemImpl) readHeader() {
 	binary.Read(buffer, binary.BigEndian, &size)
 	binary.Read(buffer, binary.BigEndian, &firstFree)
 
+	return nil
 }
 
 // Initializes the filesystem after the MMAPFile has been
 // opened
-func (fSys *fileSystemImpl) init() {
+func (fSys *fileSystemImpl) init() error {
 	//	Read filesystem header
-	fSys.readHeader()
-
+	err := fSys.readHeader()
+	if err != nil {
+		return err
+	}
 }
 
-// OpenFileSystem returns the best FileSystem
-func OpenFileSystem(filename string) FileSystem {
+// Open returns the berst FileSystem
+func Open(filename string) FileSystem,error {
 	result := new(fileSystemImpl)
-	result.mFaile = mmapfile.NewFile(filename)
+	result.mFaile,err := mmapfile.NewFile(filename)
+	
+	if err != nil {
+		return nil,errors.New("Could not open filesystem: " + err.Error())
+	}
 
-	// load filesystem
-
-	return result
+	return result,nil
 }
